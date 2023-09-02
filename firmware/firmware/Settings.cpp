@@ -86,7 +86,9 @@ void Settings::applySettings() {
     Motor::i().setMotorSteps(m_motorSteps);
     Motor::i().setMicrostepping(m_microStepping);
     Motor::i().setInverted(m_invert);
+    Motor::i().setSpeed(m_speed);
     Motor::i().setStandStillMode(m_standStillMode);
+    Motor::i().setStealthChop(m_stealthChop);
 }
 
 Settings::Settings() {
@@ -158,8 +160,8 @@ bool Settings::runStatus(const char *cmd) {
 }
 
 bool Settings::runSetTarget(const char *cmd) {
-    step_t target;
-    if ( sscanf_P(cmd, PSTR("set target %d"), &target) != 1 ) {
+    uint16_t target;
+    if ( sscanf_P(cmd, PSTR("set target %u"), &target) != 1 ) {
         return false;
     }
     Motor::i().setTargetAngle((float) target / 100.);
@@ -169,7 +171,7 @@ bool Settings::runSetTarget(const char *cmd) {
 
 bool Settings::runSetTeethSmall(const char *cmd) {
     uint16_t teeth;
-    if ( sscanf_P(cmd, PSTR("set teeth small %d"), &teeth) != 1 ) {
+    if ( sscanf_P(cmd, PSTR("set teeth small %u"), &teeth) != 1 ) {
         return false;
     }
     Motor::i().setTeethSmall(teeth);
@@ -180,7 +182,7 @@ bool Settings::runSetTeethSmall(const char *cmd) {
 
 bool Settings::runSetTeethBig(const char *cmd) {
     uint16_t teeth;
-    if ( sscanf_P(cmd, PSTR("set teeth big %d"), &teeth) != 1 ) {
+    if ( sscanf_P(cmd, PSTR("set teeth big %u"), &teeth) != 1 ) {
         return false;
     }
     Motor::i().setTeethBig(teeth);
@@ -191,7 +193,7 @@ bool Settings::runSetTeethBig(const char *cmd) {
 
 bool Settings::runSetRunCurrent(const char *cmd) {
     uint8_t current;
-    if ( sscanf_P(cmd, PSTR("set rc %d"), &current) != 1 ) {
+    if ( sscanf_P(cmd, PSTR("set rc %u"), &current) != 1 ) {
         return false;
     }
     Motor::i().setRunCurrent(current);
@@ -202,7 +204,7 @@ bool Settings::runSetRunCurrent(const char *cmd) {
 
 bool Settings::runSetHoldCurrent(const char *cmd) {
     uint8_t current;
-    if ( sscanf_P(cmd, PSTR("set hc %d"), &current) != 1 ) {
+    if ( sscanf_P(cmd, PSTR("set hc %u"), &current) != 1 ) {
         return false;
     }
     Motor::i().setHoldCurrent(current);
@@ -213,7 +215,7 @@ bool Settings::runSetHoldCurrent(const char *cmd) {
 
 bool Settings::runSetMotorSteps(const char *cmd) {
     uint16_t steps;
-    if ( sscanf_P(cmd, PSTR("set motor steps %d"), &steps) != 1 ) {
+    if ( sscanf_P(cmd, PSTR("set motor steps %u"), &steps) != 1 ) {
         return false;
     }
     Motor::i().setMotorSteps(steps);
@@ -224,7 +226,7 @@ bool Settings::runSetMotorSteps(const char *cmd) {
 
 bool Settings::runSetMicroStepping(const char *cmd) {
     uint8_t steps;
-    if ( sscanf_P(cmd, PSTR("set micro steps %d"), &steps) != 1 ) {
+    if ( sscanf_P(cmd, PSTR("set micro steps %u"), &steps) != 1 ) {
         return false;
     }
     Motor::i().setMicrostepping(steps);
@@ -255,12 +257,24 @@ bool Settings::runSetInverted(const char *cmd) {
 
 bool Settings::runSetSpeed(const char *cmd) {
     uint16_t speed;
-    if ( sscanf_P(cmd, PSTR("set speed %d"), &speed) != 1 ) {
+    if ( sscanf_P(cmd, PSTR("set speed %u"), &speed) != 1 ) {
         return false;
     }
     Motor::i().setSpeed(speed);
     m_speed = speed;
     saveAndAck();
+    return true;
+}
+
+bool Settings::runSetAccel(const char *cmd) {
+    uint16_t accel;
+    if ( sscanf_P(cmd, PSTR("set accel %u"), &accel) != 1 ) {
+        return false;
+    }
+    Motor::i().setAccel(accel);
+    m_accel = accel;
+    saveAndAck();
+    return true;
 }
 
 bool Settings::runSetStandStillMode(const char *cmd) {
@@ -274,19 +288,42 @@ bool Settings::runSetStandStillMode(const char *cmd) {
     return false;
 }
 
+bool Settings::runSetStealthChop(const char *cmd) {
+    bool enabled;
+    bool found;
+    if ( strcmp_P(cmd, F("set stealthchop on")) == 0 ) {
+        enabled = true;
+        found = true;
+    }
+    if ( strcmp_P(cmd, F("set stealthchop off")) == 0 ) {
+        enabled = false;
+        found = true;
+    }
+    if ( ! found ) {
+        return false;
+    }
+    m_stealthChop = enabled;
+    Motor::i().setStealthChop(m_stealthChop);
+    saveAndAck();
+    return true;
+}
+
 bool Settings::runSync(const char *cmd) {
     uint16_t angle;
-    if ( sscanf_P(cmd, PSTR("sync %d"), &angle) != 1 ) {
+    if ( sscanf_P(cmd, PSTR("sync %u"), &angle) != 1 ) {
         return false;
     }
     Motor::i().syncAngle( (float) angle / 100. );
+    sendStatus();
+    return true;
 }
 
 bool Settings::runStop(const char *cmd) {
-    if ( strcmp_P(cmd, F("stop")) != 0 ) {
+    if ( strcmp_P(cmd, F("stop") ) ) {
         return false;
     }
     Motor::i().stop();
+    sendStatus();
     return true;
 }
 
@@ -300,42 +337,67 @@ void Settings::saveAndAck() {
 }
 
 bool Settings::runCommand(const char *cmd) {
+  Motor::i().update();
   if ( runStatus(cmd) ) {
       return true;
   }
+  Motor::i().update();
   if ( runSetTarget(cmd) ) {
       return true;
   }
+  Motor::i().update();
+  if ( runStop(cmd) ) {
+      return true;
+  }
+  Motor::i().update();
   if ( runSetMicroStepping(cmd) ) {
       return true;
   }
+  Motor::i().update();
   if ( runSetSpeed(cmd) ) {
       return true;
   }
+  Motor::i().update();
+  if ( runSetAccel(cmd) ) {
+      return true;
+  }
+  Motor::i().update();
   if ( runSetRunCurrent(cmd) ) {
       return true;
   }
+  Motor::i().update();
   if ( runSetHoldCurrent(cmd) ) {
       return true;
   }
+  Motor::i().update();
   if ( runSetMotorSteps(cmd) ) {
       return true;
   }
+  Motor::i().update();
   if ( runSetStandStillMode(cmd) ) {
       return true;
   }
+  Motor::i().update();
   if ( runSetInverted(cmd) ) {
       return true;
   }
+  Motor::i().update();
   if ( runSetTeethSmall(cmd) ) {
       return true;
   }
+  Motor::i().update();
   if ( runSetTeethBig(cmd) ) {
       return true;
   }
+  Motor::i().update();
   if ( runSync(cmd) ) {
       return true;
   }
+  Motor::i().update();
+  if ( runSetStealthChop(cmd) ) {
+      return true;
+  }
+  Motor::i().update();
   runUnknownCommand();
   return false;
 }
@@ -354,11 +416,13 @@ void Settings::loop() {
     char c = Serial.read();
     switch (c) {
       case MSG_PREFIX:
+        Motor::i().update();
 	inCommand = true;
 	CommandBuffer::i().clear();
 	CommandBuffer::i().add(c);
 	break;
       case MSG_POSTFIX:
+        Motor::i().update();
 	if ( inCommand ) {
 	  inCommand = false;
 	  if ( ! CommandBuffer::i().add(c) ) {
@@ -367,6 +431,7 @@ void Settings::loop() {
 	    break;
 	  }
 	  if ( CommandBuffer::i().verifyChecksum() ) {
+            Motor::i().update();
 	    runCommand(CommandBuffer::i().getCommand());
 	  } else {
 	    sendErrorMessage(F("Checksum error"));
@@ -375,6 +440,7 @@ void Settings::loop() {
 	}
 	break;
       default:
+        Motor::i().update();
 	if ( inCommand ) {
 	  if ( ! CommandBuffer::i().add(c) ) {
 	    // Overflow

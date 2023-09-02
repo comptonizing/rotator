@@ -5,15 +5,22 @@ Motor::Motor() {
     m_driver.setup(*m_serial);
     m_stepper = new AccelStepper(1, PIN_STEP, PIN_DIR);
 
-    m_driver.enableCoolStep();
+    //  m_driver.enableCoolStep();
     m_driver.setRunCurrent(m_runCurrent);
     m_driver.setHoldCurrent(m_holdCurrent);
     m_driver.setMicrostepsPerStep(m_microStepping);
     m_driver.setStandstillMode(m_standStillMode);
+    m_driver.enableAnalogCurrentScaling();
+    if ( m_stealthChop ) {
+        m_driver.enableStealthChop();
+    } else {
+        m_driver.disableStealthChop();
+    }
     m_driver.enable();
 
     m_stepper->setCurrentPosition(0);
     m_stepper->setSpeed(m_speed);
+    m_stepper->setAcceleration(m_accel);
 }
 
 void Motor::update() {
@@ -21,7 +28,7 @@ void Motor::update() {
 }
 
 float Motor::gearRatio() {
-    (float) m_teethBig / (float) m_teethSmall;
+    return (float) m_teethBig / (float) m_teethSmall;
 }
 
 uint16_t Motor::motorRevolutionSteps() {
@@ -29,15 +36,15 @@ uint16_t Motor::motorRevolutionSteps() {
 }
 
 step_t Motor::fullRevolutionSteps() {
-    return (uint16_t) round(gearRatio() * motorRevolutionSteps());
+    return (step_t) round(gearRatio() * (float) motorRevolutionSteps());
 }
 
 float Motor::degressPerStep() {
     return 360. / (float) fullRevolutionSteps();
 }
 
-uint16_t Motor::stepsPerDegree() {
-    return (uint16_t) round((float) fullRevolutionSteps() / 360.);
+float Motor::stepsPerDegree() {
+    return (float) fullRevolutionSteps() / 360.;
 }
 
 float Motor::stepsToAngle(step_t steps) {
@@ -145,6 +152,15 @@ void Motor::setSpeed(uint16_t speed) {
     m_stepper->setMaxSpeed(m_speed);
 }
 
+uint16_t Motor::accel() {
+    return m_accel;
+}
+
+void Motor::setAccel(uint16_t accel) {
+    m_accel = accel;
+    m_stepper->setAcceleration(m_accel);
+}
+
 uint16_t Motor::teethSmall() {
     return m_teethSmall;
 }
@@ -181,27 +197,53 @@ Motor &Motor::i() {
 }
 
 void Motor::state(char *buff, size_t buffSize) {
+    // Make sure all parameters are current
+    update();
     StaticJsonDocument<256> json;
 
     json[F("A")] = currentAngle();
+    update();
     json[F("S")] = (step_t) currentSteps();
-    json[F("M")] = motorRevolutionSteps();
+    update();
+    json[F("M")] = motorSteps();
+    update();
     json[F("F")] = fullRevolutionSteps();
+    update();
     json[F("SPD")] = stepsPerDegree();
+    update();
     json[F("TA")] = targetAngle();
+    update();
     json[F("TS")] = targetSteps();
+    update();
     json[F("RC")] = runCurrent();
+    update();
     json[F("HC")] = holdCurrent();
+    update();
     json[F("uS")] = microstepping();
+    update();
     json[F("I")] = isInverted();
+    update();
     json[F("SSM")] = standStillMode();
+    update();
     json[F("MS")] = motorSteps();
+    update();
     json[F("SP")] = speed();
+    update();
+    json[F("AC")] = accel();
+    update();
     json[F("GS")] = teethSmall();
+    update();
     json[F("GB")] = teethBig();
+    update();
     json[F("MO")] = m_stepper->isRunning();
+    update();
+    json[F("CP")] = m_stealthChop;
+
+    update();
 
     serializeJson(json, buff, buffSize);
+
+    update();
 }
 
 void Motor::syncSteps(step_t steps) {
@@ -214,4 +256,13 @@ void Motor::syncAngle(float angle) {
 
 void Motor::stop() {
     m_stepper->stop();
+}
+
+void Motor::setStealthChop(bool enabled) {
+    m_stealthChop = enabled;
+    if ( m_stealthChop ) {
+        m_driver.enableStealthChop();
+    } else {
+        m_driver.disableStealthChop();
+    }
 }

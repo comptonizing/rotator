@@ -20,7 +20,7 @@ class Motor {
         uint16_t motorRevolutionSteps();
         step_t fullRevolutionSteps();
         float degressPerStep();
-        uint16_t stepsPerDegree();
+        float stepsPerDegree();
         float stepsToAngle(step_t steps);
         step_t angleToSteps(float angle);
         step_t currentSteps();
@@ -42,6 +42,8 @@ class Motor {
         void setMotorSteps(uint16_t steps);
         uint16_t speed();
         void setSpeed(uint16_t speed);
+        uint16_t accel();
+        void setAccel(uint16_t accel);
         uint16_t teethSmall();
         uint16_t teethBig();
         void setTeethSmall(uint16_t teeth);
@@ -50,6 +52,8 @@ class Motor {
         void state(char *buff, size_t buffSize);
         void syncSteps(step_t steps);
         void syncAngle(float angle);
+        bool stealthChop();
+        void setStealthChop(bool enabled);
         void stop();
 
     private:
@@ -60,8 +64,10 @@ class Motor {
 
         uint8_t m_runCurrent = 100;
         uint8_t m_holdCurrent = 100;
+        bool m_stealthChop = false;
         bool m_invert = false;
-        uint16_t m_speed = 1000;
+        uint16_t m_speed = 2000;
+        uint16_t m_accel = 10000;
         TMC2209::StandstillMode m_standStillMode = TMC2209::StandstillMode::NORMAL;
 
         uint8_t m_microStepping = 16;
