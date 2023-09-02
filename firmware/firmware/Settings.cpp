@@ -315,8 +315,10 @@ void Settings::setup() {
 }
 
 void Settings::loop() {
+  Motor::i().update();
   static bool inCommand = false;
   while ( Serial.available() ) {
+    Motor::i().update();
     char c = Serial.read();
     switch (c) {
       case MSG_PREFIX:
