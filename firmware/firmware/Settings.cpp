@@ -253,6 +253,16 @@ bool Settings::runSetInverted(const char *cmd) {
     return false;
 }
 
+bool Settings::runSetSpeed(const char *cmd) {
+    uint16_t speed;
+    if ( sscanf_P(cmd, PSTR("set speed %d"), &speed) != 1 ) {
+        return false;
+    }
+    Motor::i().setSpeed(speed);
+    m_speed = speed;
+    saveAndAck();
+}
+
 bool Settings::runSetStandStillMode(const char *cmd) {
     TMC2209::StandstillMode mode;
     if ( sscanf_P(cmd, PSTR("set standstill %d"), &mode) != 1 ) {
@@ -281,6 +291,9 @@ bool Settings::runCommand(const char *cmd) {
       return true;
   }
   if ( runSetMicroStepping(cmd) ) {
+      return true;
+  }
+  if ( runSetSpeed(cmd) ) {
       return true;
   }
   if ( runSetRunCurrent(cmd) ) {

@@ -46,6 +46,7 @@ class Settings {
     bool runSetMotorSteps(const char *cmd);
     bool runSetMicroStepping(const char *cmd);
     bool runSetInverted(const char *cmd);
+    bool runSetSpeed(const char *cmd);
     bool runSetStandStillMode(const char *cmd);
     void runUnknownCommand();
     void saveAndAck();
@@ -61,6 +62,7 @@ class Settings {
     uint8_t m_holdCurrent = 100;
     uint16_t m_motorSteps = 200;
     uint8_t m_microStepping = 16;
+    uint16_t m_speed = 1000;
     bool m_invert = false;
     TMC2209::StandstillMode m_standStillMode = TMC2209::StandstillMode::NORMAL;
 };

@@ -13,6 +13,7 @@ Motor::Motor() {
     m_driver.enable();
 
     m_stepper->setCurrentPosition(0);
+    m_stepper->setSpeed(m_speed);
 }
 
 void Motor::update() {
@@ -135,6 +136,15 @@ void Motor::setMotorSteps(uint16_t steps) {
     setGear(m_teethSmall, m_teethBig, steps, m_microStepping);
 }
 
+uint16_t Motor::speed() {
+    return m_speed;
+}
+
+void Motor::setSpeed(uint16_t speed) {
+    m_speed = speed;
+    m_stepper->setMaxSpeed(m_speed);
+}
+
 uint16_t Motor::teethSmall() {
     return m_teethSmall;
 }
@@ -186,6 +196,7 @@ void Motor::state(char *buff, size_t buffSize) {
     json[F("I")] = isInverted();
     json[F("SSM")] = standStillMode();
     json[F("MS")] = motorSteps();
+    json[F("SP")] = speed();
     json[F("GS")] = teethSmall();
     json[F("GB")] = teethBig();
     json[F("MO")] = m_stepper->isRunning();
