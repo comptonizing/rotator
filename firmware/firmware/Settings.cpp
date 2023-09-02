@@ -274,6 +274,14 @@ bool Settings::runSetStandStillMode(const char *cmd) {
     return false;
 }
 
+bool Settings::runSync(const char *cmd) {
+    uint16_t angle;
+    if ( sscanf_P(cmd, PSTR("sync %d"), &angle) != 1 ) {
+        return false;
+    }
+    Motor::i().syncAngle( (float) angle / 100. );
+}
+
 void Settings::runUnknownCommand() {
   sendErrorMessage(F("Unknown command"));
 }
@@ -315,6 +323,9 @@ bool Settings::runCommand(const char *cmd) {
       return true;
   }
   if ( runSetTeethBig(cmd) ) {
+      return true;
+  }
+  if ( runSync(cmd) ) {
       return true;
   }
   runUnknownCommand();

@@ -48,6 +48,7 @@ class Settings {
     bool runSetInverted(const char *cmd);
     bool runSetSpeed(const char *cmd);
     bool runSetStandStillMode(const char *cmd);
+    bool runSync(const char *cmd);
     void runUnknownCommand();
     void saveAndAck();
     void sendMessage(char *msg);
