@@ -50,6 +50,7 @@ class Motor {
         void state(char *buff, size_t buffSize);
         void syncSteps(step_t steps);
         void syncAngle(float angle);
+        void stop();
 
     private:
         Motor();

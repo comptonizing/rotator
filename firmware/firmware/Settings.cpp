@@ -282,6 +282,14 @@ bool Settings::runSync(const char *cmd) {
     Motor::i().syncAngle( (float) angle / 100. );
 }
 
+bool Settings::runStop(const char *cmd) {
+    if ( strcmp_P(cmd, F("stop")) != 0 ) {
+        return false;
+    }
+    Motor::i().stop();
+    return true;
+}
+
 void Settings::runUnknownCommand() {
   sendErrorMessage(F("Unknown command"));
 }

@@ -211,3 +211,7 @@ void Motor::syncSteps(step_t steps) {
 void Motor::syncAngle(float angle) {
     m_stepper->setCurrentPosition(angleToSteps(angle));
 }
+
+void Motor::stop() {
+    m_stepper->stop();
+}
