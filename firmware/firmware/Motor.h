@@ -48,6 +48,8 @@ class Motor {
         void setTeethBig(uint16_t teeth);
         void setGear(uint16_t teethSmall, uint16_t teethBig, uint16_t motorSteps, uint8_t microstepping);
         void state(char *buff, size_t buffSize);
+        void syncSteps(step_t steps);
+        void syncAngle(float angle);
 
     private:
         Motor();

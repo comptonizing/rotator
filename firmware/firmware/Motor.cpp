@@ -203,3 +203,11 @@ void Motor::state(char *buff, size_t buffSize) {
 
     serializeJson(json, buff, buffSize);
 }
+
+void Motor::syncSteps(step_t steps) {
+    m_stepper->setCurrentPosition(steps);
+}
+
+void Motor::syncAngle(float angle) {
+    m_stepper->setCurrentPosition(angleToSteps(angle));
+}
