@@ -89,6 +89,7 @@ void Settings::applySettings() {
     Motor::i().setSpeed(m_speed);
     Motor::i().setStandStillMode(m_standStillMode);
     Motor::i().setStealthChop(m_stealthChop);
+    Motor::i().setCoolStep(m_coolStep);
 }
 
 Settings::Settings() {
@@ -103,30 +104,44 @@ Settings::~Settings() {
 
 void Settings::sendMessage(char *msg) {
   uint16_t crc = crcCalc(msg);
+  Motor::i().update();
   char crcMsg[3];
   crcMsg[0] = ((char *) &crc)[0];
   crcMsg[1] = ((char *) &crc)[1];
   crcMsg[2] = '\0';
   Serial.print(MSG_PREFIX);
+  Motor::i().update();
   Serial.print(msg);
+  Motor::i().update();
   Serial.print('\0');
+  Motor::i().update();
   Serial.print(crcMsg[0]);
+  Motor::i().update();
   Serial.print(crcMsg[1]);
+  Motor::i().update();
   Serial.print(MSG_POSTFIX);
+  Motor::i().update();
 }
 
 void Settings::sendMessage(const __FlashStringHelper *msg) {
   uint16_t crc = crcCalc(msg, strlen_P(msg));
+  Motor::i().update();
   char crcMsg[3];
   crcMsg[0] = ((char *) &crc)[0];
   crcMsg[1] = ((char *) &crc)[1];
   crcMsg[2] = '\0';
   Serial.print(MSG_PREFIX);
+  Motor::i().update();
   Serial.print(msg);
+  Motor::i().update();
   Serial.print('\0');
+  Motor::i().update();
   Serial.print(crcMsg[0]);
+  Motor::i().update();
   Serial.print(crcMsg[1]);
+  Motor::i().update();
   Serial.print(MSG_POSTFIX);
+  Motor::i().update();
 }
 
 void Settings::sendErrorMessage(char *msg) {
@@ -147,15 +162,20 @@ void Settings::sendErrorMessage(const __FlashStringHelper *msg) {
 
 void Settings::sendStatus() {
   char buff[BUFFSIZE];
+  Motor::i().update();
   Motor::i().state(buff, BUFFSIZE);
+  Motor::i().update();
   sendMessage(buff);
+  Motor::i().update();
 }
 
 bool Settings::runStatus(const char *cmd) {
   if ( strcmp_P(cmd, F("status") ) ) {
     return false;
   }
+  Motor::i().update();
   sendStatus();
+  Motor::i().update();
   return true;
 }
 
@@ -164,8 +184,11 @@ bool Settings::runSetTarget(const char *cmd) {
     if ( sscanf_P(cmd, PSTR("set target %u"), &target) != 1 ) {
         return false;
     }
+    Motor::i().update();
     Motor::i().setTargetAngle((float) target / 100.);
+    Motor::i().update();
     sendStatus();
+    Motor::i().update();
     return true;
 }
 
@@ -174,9 +197,12 @@ bool Settings::runSetTeethSmall(const char *cmd) {
     if ( sscanf_P(cmd, PSTR("set teeth small %u"), &teeth) != 1 ) {
         return false;
     }
+    Motor::i().update();
     Motor::i().setTeethSmall(teeth);
+    Motor::i().update();
     m_teethSmall = teeth;
     saveAndAck();
+    Motor::i().update();
     return true;
 }
 
@@ -185,9 +211,12 @@ bool Settings::runSetTeethBig(const char *cmd) {
     if ( sscanf_P(cmd, PSTR("set teeth big %u"), &teeth) != 1 ) {
         return false;
     }
+    Motor::i().update();
     Motor::i().setTeethBig(teeth);
+    Motor::i().update();
     m_teethBig = teeth;
     saveAndAck();
+    Motor::i().update();
     return true;
 }
 
@@ -196,9 +225,12 @@ bool Settings::runSetRunCurrent(const char *cmd) {
     if ( sscanf_P(cmd, PSTR("set rc %u"), &current) != 1 ) {
         return false;
     }
+    Motor::i().update();
     Motor::i().setRunCurrent(current);
+    Motor::i().update();
     m_runCurrent = current;
     saveAndAck();
+    Motor::i().update();
     return true;
 }
 
@@ -207,9 +239,12 @@ bool Settings::runSetHoldCurrent(const char *cmd) {
     if ( sscanf_P(cmd, PSTR("set hc %u"), &current) != 1 ) {
         return false;
     }
+    Motor::i().update();
     Motor::i().setHoldCurrent(current);
+    Motor::i().update();
     m_holdCurrent = current;
     saveAndAck();
+    Motor::i().update();
     return true;
 }
 
@@ -218,9 +253,12 @@ bool Settings::runSetMotorSteps(const char *cmd) {
     if ( sscanf_P(cmd, PSTR("set motor steps %u"), &steps) != 1 ) {
         return false;
     }
+    Motor::i().update();
     Motor::i().setMotorSteps(steps);
+    Motor::i().update();
     m_motorSteps = steps;
     saveAndAck();
+    Motor::i().update();
     return true;
 }
 
@@ -229,9 +267,12 @@ bool Settings::runSetMicroStepping(const char *cmd) {
     if ( sscanf_P(cmd, PSTR("set micro steps %u"), &steps) != 1 ) {
         return false;
     }
+    Motor::i().update();
     Motor::i().setMicrostepping(steps);
+    Motor::i().update();
     m_microStepping = steps;
     saveAndAck();
+    Motor::i().update();
     return true;
 }
 
@@ -242,16 +283,20 @@ bool Settings::runSetInverted(const char *cmd) {
         inverted = true;
         found = true;
     }
+    Motor::i().update();
     if ( strcmp_P(cmd, F("set invert off")) == 0 ) {
         inverted = false;
         found = true;
     }
+    Motor::i().update();
     if ( ! found ) {
         return false;
     }
     m_invert = inverted;
     Motor::i().setInverted(inverted);
+    Motor::i().update();
     saveAndAck();
+    Motor::i().update();
     return false;
 }
 
@@ -260,9 +305,12 @@ bool Settings::runSetSpeed(const char *cmd) {
     if ( sscanf_P(cmd, PSTR("set speed %u"), &speed) != 1 ) {
         return false;
     }
+    Motor::i().update();
     Motor::i().setSpeed(speed);
+    Motor::i().update();
     m_speed = speed;
     saveAndAck();
+    Motor::i().update();
     return true;
 }
 
@@ -271,9 +319,12 @@ bool Settings::runSetAccel(const char *cmd) {
     if ( sscanf_P(cmd, PSTR("set accel %u"), &accel) != 1 ) {
         return false;
     }
+    Motor::i().update();
     Motor::i().setAccel(accel);
+    Motor::i().update();
     m_accel = accel;
     saveAndAck();
+    Motor::i().update();
     return true;
 }
 
@@ -284,27 +335,57 @@ bool Settings::runSetStandStillMode(const char *cmd) {
     }
     m_standStillMode = mode;
     Motor::i().setStandStillMode(mode);
+    Motor::i().update();
     saveAndAck();
+    Motor::i().update();
     return false;
 }
 
 bool Settings::runSetStealthChop(const char *cmd) {
     bool enabled;
-    bool found;
+    bool found = false;
     if ( strcmp_P(cmd, F("set stealthchop on")) == 0 ) {
         enabled = true;
         found = true;
     }
+    Motor::i().update();
     if ( strcmp_P(cmd, F("set stealthchop off")) == 0 ) {
         enabled = false;
         found = true;
     }
+    Motor::i().update();
     if ( ! found ) {
         return false;
     }
     m_stealthChop = enabled;
     Motor::i().setStealthChop(m_stealthChop);
+    Motor::i().update();
     saveAndAck();
+    Motor::i().update();
+    return true;
+}
+
+bool Settings::runSetCoolStep(const char *cmd) {
+    bool enabled;
+    bool found;
+    if ( strcmp_P(cmd, F("set coolstep on")) == 0 ) {
+        enabled = true;
+        found = true;
+    }
+    Motor::i().update();
+    if ( strcmp_P(cmd, F("set coolstep off")) == 0 ) {
+        enabled = false;
+        found = true;
+    }
+    Motor::i().update();
+    if ( ! found ) {
+        return false;
+    }
+    m_coolStep = enabled;
+    Motor::i().setCoolStep(m_coolStep);
+    Motor::i().update();
+    saveAndAck();
+    Motor::i().update();
     return true;
 }
 
@@ -313,8 +394,11 @@ bool Settings::runSync(const char *cmd) {
     if ( sscanf_P(cmd, PSTR("sync %u"), &angle) != 1 ) {
         return false;
     }
+    Motor::i().update();
     Motor::i().syncAngle( (float) angle / 100. );
+    Motor::i().update();
     sendStatus();
+    Motor::i().update();
     return true;
 }
 
@@ -322,18 +406,24 @@ bool Settings::runStop(const char *cmd) {
     if ( strcmp_P(cmd, F("stop") ) ) {
         return false;
     }
+    Motor::i().update();
     Motor::i().stop();
+    Motor::i().update();
     sendStatus();
+    Motor::i().update();
     return true;
 }
 
 void Settings::runUnknownCommand() {
   sendErrorMessage(F("Unknown command"));
+  Motor::i().update();
 }
 
 void Settings::saveAndAck() {
   saveToEEPROM();
+  Motor::i().update();
   sendStatus();
+  Motor::i().update();
 }
 
 bool Settings::runCommand(const char *cmd) {
@@ -398,6 +488,10 @@ bool Settings::runCommand(const char *cmd) {
       return true;
   }
   Motor::i().update();
+  if ( runSetCoolStep(cmd) ) {
+      return true;
+  }
+  Motor::i().update();
   runUnknownCommand();
   return false;
 }
@@ -414,35 +508,40 @@ void Settings::loop() {
   while ( Serial.available() ) {
     Motor::i().update();
     char c = Serial.read();
+    Motor::i().update();
     switch (c) {
       case MSG_PREFIX:
-        Motor::i().update();
 	inCommand = true;
 	CommandBuffer::i().clear();
+        Motor::i().update();
 	CommandBuffer::i().add(c);
+        Motor::i().update();
 	break;
       case MSG_POSTFIX:
-        Motor::i().update();
 	if ( inCommand ) {
 	  inCommand = false;
 	  if ( ! CommandBuffer::i().add(c) ) {
+            Motor::i().update();
 	    // Overflow
 	    CommandBuffer::i().clear();
+            Motor::i().update();
 	    break;
 	  }
 	  if ( CommandBuffer::i().verifyChecksum() ) {
             Motor::i().update();
 	    runCommand(CommandBuffer::i().getCommand());
+            Motor::i().update();
 	  } else {
 	    sendErrorMessage(F("Checksum error"));
 	  }
 	  CommandBuffer::i().clear();
+          Motor::i().update();
 	}
 	break;
       default:
-        Motor::i().update();
 	if ( inCommand ) {
 	  if ( ! CommandBuffer::i().add(c) ) {
+            Motor::i().update();
 	    // Overflow
 	    CommandBuffer::i().clear();
 	    inCommand = false;

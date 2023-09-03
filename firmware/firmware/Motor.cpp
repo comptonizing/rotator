@@ -11,6 +11,11 @@ Motor::Motor() {
     m_driver.setMicrostepsPerStep(m_microStepping);
     m_driver.setStandstillMode(m_standStillMode);
     m_driver.enableAnalogCurrentScaling();
+    if ( m_coolStep ) {
+        m_driver.enableCoolStep();
+    } else {
+        m_driver.disableCoolStep();
+    }
     if ( m_stealthChop ) {
         m_driver.enableStealthChop();
     } else {
@@ -200,6 +205,7 @@ void Motor::state(char *buff, size_t buffSize) {
     // Make sure all parameters are current
     update();
     StaticJsonDocument<256> json;
+    update();
 
     json[F("A")] = currentAngle();
     update();
@@ -237,7 +243,9 @@ void Motor::state(char *buff, size_t buffSize) {
     update();
     json[F("MO")] = m_stepper->isRunning();
     update();
-    json[F("CP")] = m_stealthChop;
+    json[F("CP")] = stealthChop();
+    update();
+    json[F("CS")] = coolStep();
 
     update();
 
@@ -258,11 +266,28 @@ void Motor::stop() {
     m_stepper->stop();
 }
 
+bool Motor::stealthChop() {
+    return m_stealthChop;
+}
+
 void Motor::setStealthChop(bool enabled) {
     m_stealthChop = enabled;
     if ( m_stealthChop ) {
         m_driver.enableStealthChop();
     } else {
         m_driver.disableStealthChop();
+    }
+}
+
+bool Motor::coolStep() {
+    return m_coolStep;
+}
+
+void Motor::setCoolStep(bool enabled) {
+    m_coolStep = enabled;
+    if ( m_coolStep ) {
+        m_driver.enableCoolStep();
+    } else {
+        m_driver.disableCoolStep();
     }
 }

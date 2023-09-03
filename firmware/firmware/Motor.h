@@ -54,6 +54,8 @@ class Motor {
         void syncAngle(float angle);
         bool stealthChop();
         void setStealthChop(bool enabled);
+        bool coolStep();
+        void setCoolStep(bool enabled);
         void stop();
 
     private:
@@ -62,12 +64,13 @@ class Motor {
         Motor(const Motor &);
         Motor& operator=(const Motor&);
 
-        uint8_t m_runCurrent = 100;
-        uint8_t m_holdCurrent = 100;
+        uint8_t m_runCurrent = 50;
+        uint8_t m_holdCurrent = 10;
         bool m_stealthChop = false;
+        bool m_coolStep = true;
         bool m_invert = false;
-        uint16_t m_speed = 2000;
-        uint16_t m_accel = 10000;
+        uint16_t m_speed = 500;
+        uint16_t m_accel = 200;
         TMC2209::StandstillMode m_standStillMode = TMC2209::StandstillMode::NORMAL;
 
         uint8_t m_microStepping = 16;
