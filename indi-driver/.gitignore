@@ -21,3 +21,4 @@ missing
 *.o
 *.Po
 .deps
+compile_commands.json
