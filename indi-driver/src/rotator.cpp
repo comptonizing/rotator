@@ -78,6 +78,12 @@ bool RotatorPollux::initProperties() {
             "STEALTHCHOP", "Stealth Chop", MAIN_CONTROL_TAB, IP_RW,
             ISR_1OFMANY, TIMEOUT, IPS_IDLE);
 
+    IUFillSwitch(&CoolStepS[INDI_ENABLED], "ENABLED", "Enabled", ISS_OFF);
+    IUFillSwitch(&CoolStepS[INDI_DISABLED], "DISABLED", "Disabled", ISS_OFF);
+    IUFillSwitchVector(&CoolStepSP, CoolStepS, 2, getDeviceName(),
+            "COOLSTEP", "Cool Step", MAIN_CONTROL_TAB, IP_RW,
+            ISR_1OFMANY, TIMEOUT, IPS_IDLE);
+
     IUFillNumber(&GearN[TEETH_SMALL], "TEETH_SMALL", "Teeth small", "%.0f", 1, 100, 1, 10);
     IUFillNumber(&GearN[TEETH_BIG], "TEETH_BIG", "Teeth big", "%.0f", 1, 1000, 1, 140);
     IUFillNumberVector(&GearNP, GearN, 2, getDeviceName(), "GEAR", "Gear Settings",
@@ -105,6 +111,7 @@ bool RotatorPollux::updateProperties() {
         defineProperty(&MicroSteppingSP);
         defineProperty(&StandStillModeSP);
         defineProperty(&StealthChopSP);
+        defineProperty(&CoolStepSP);
         defineProperty(&GearNP);
         defineProperty(&MotionNP);
     } else {
@@ -112,6 +119,7 @@ bool RotatorPollux::updateProperties() {
         deleteProperty(MicroSteppingSP.name);
         deleteProperty(StandStillModeSP.name);
         deleteProperty(StealthChopSP.name);
+        deleteProperty(CoolStepSP.name);
         deleteProperty(GearNP.name);
         deleteProperty(MotionNP.name);
     }
@@ -329,13 +337,27 @@ void RotatorPollux::setReverse(const json& data) {
 void RotatorPollux::setStealthChop(const json& data) {
     try {
         bool enabled = data["CP"].template get<bool>();
-        StealthChopS[INDI_DISABLED].s = enabled ? ISS_ON : ISS_OFF;
+        StealthChopS[INDI_ENABLED].s = enabled ? ISS_ON : ISS_OFF;
         StealthChopS[INDI_DISABLED].s = enabled ? ISS_OFF : ISS_ON;
         StealthChopSP.s = IPS_OK;
         IDSetSwitch(&StealthChopSP, nullptr);
     } catch (...) {
         StealthChopSP.s = IPS_ALERT;
         IDSetSwitch(&StealthChopSP, nullptr);
+        throw;
+    }
+}
+
+void RotatorPollux::setCoolStep(const json& data) {
+    try {
+        bool enabled = data["CS"].template get<bool>();
+        CoolStepS[INDI_ENABLED].s = enabled ? ISS_ON : ISS_OFF;
+        CoolStepS[INDI_DISABLED].s = enabled ? ISS_OFF : ISS_ON;
+        CoolStepSP.s = IPS_OK;
+        IDSetSwitch(&CoolStepSP, nullptr);
+    } catch (...) {
+        CoolStepSP.s = IPS_ALERT;
+        IDSetSwitch(&CoolStepSP, nullptr);
         throw;
     }
 }
@@ -433,6 +455,7 @@ bool RotatorPollux::updateFromResponse(const char *rsp) {
       setAngle(data);
       setReverse(data);
       setStealthChop(data);
+      setCoolStep(data);
       setMotor(data);
       setMicrostepping(data);
       setStandstillMode(data);
@@ -585,6 +608,29 @@ bool RotatorPollux::processStealthChopSP(ISState *states, char *names[], int n) 
     return true;
 }
 
+bool RotatorPollux::processCoolStepSP(ISState *states, char *names[], int n) {
+    char rsp[RSPBUFF];
+    bool commandStatus;
+    int old = IUFindOnSwitchIndex(&CoolStepSP);
+    IUUpdateSwitch(&CoolStepSP, states, names, n);
+    int active = IUFindOnSwitchIndex(&CoolStepSP);
+    if ( active == INDI_ENABLED ) {
+        commandStatus = sendCommand("set coolstep on", rsp);
+    } else {
+        commandStatus = sendCommand("set coolstep off", rsp);
+    }
+    if ( ! commandStatus || ! updateFromResponse(rsp) ) {
+        CoolStepS[active].s = ISS_OFF;
+        CoolStepS[old].s = ISS_ON;
+        CoolStepSP.s = IPS_ALERT;
+        IDSetSwitch(&CoolStepSP, nullptr);
+        return false;
+    }
+    CoolStepSP.s = IPS_OK;
+    IDSetSwitch(&CoolStepSP, nullptr);
+    return true;
+}
+
 bool RotatorPollux::ISNewNumber(const char *dev, const char *name, double *values, char *names[], int n) {
     if (dev && !strcmp(dev, getDeviceName())) {
         if ( strcmp(name, MotorNP.name) == 0 ) {
@@ -608,6 +654,9 @@ bool RotatorPollux::ISNewSwitch(const char * dev, const char * name, ISState * s
         }
         if ( strcmp(name, StealthChopSP.name) == 0 ) {
             return processStealthChopSP(states, names, n);
+        }
+        if ( strcmp(name, CoolStepSP.name) == 0 ) {
+            return processCoolStepSP(states, names, n);
         }
         return INDI::Rotator::ISNewSwitch(dev, name, states, names, n);
     }

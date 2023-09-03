@@ -51,6 +51,7 @@ class RotatorPollux : public INDI::Rotator {
         void setAngle(const json& data);
         void setReverse(const json& data);
         void setStealthChop(const json& data);
+        void setCoolStep(const json& data);
         void setMotor(const json& data);
         void setMicrostepping(const json& data);
         void setStandstillMode(const json& data);
@@ -61,6 +62,7 @@ class RotatorPollux : public INDI::Rotator {
         bool processMicroSteppingSP(ISState *states, char *names[], int n);
         bool processStandStillModeSP(ISState *states, char *names[], int n);
         bool processStealthChopSP(ISState *states, char *names[], int n);
+        bool processCoolStepSP(ISState *sates, char *names[], int n);
 
 
 
@@ -99,6 +101,9 @@ class RotatorPollux : public INDI::Rotator {
 
         ISwitch StealthChopS[2];
         ISwitchVectorProperty StealthChopSP;
+
+        ISwitch CoolStepS[2];
+        ISwitchVectorProperty CoolStepSP;
 
         enum {
             TEETH_SMALL = 0,
