@@ -34,7 +34,7 @@ Motor::Motor() {
     m_driver.setHoldCurrent(m_holdCurrent);
     m_driver.setMicrostepsPerStep(m_microStepping);
     m_driver.setStandstillMode(m_standStillMode);
-    m_driver.enableAnalogCurrentScaling();
+    m_driver.disableAnalogCurrentScaling();
     if ( m_coolStep ) {
         m_driver.enableCoolStep();
     } else {
