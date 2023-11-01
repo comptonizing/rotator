@@ -57,10 +57,13 @@ bool CommandBuffer::add(char c) {
 bool CommandBuffer::verifyChecksum() {
   char *start = m_buff + 1;
   int len = pos - m_buff - 5;
+  Motor::i().update();
   uint16_t crcRef;
   memcpy(&crcRef, start + len + 1, 2);
+  Motor::i().update();
   uint16_t crc = 0;
   for (int ii=0; ii<len; ii++) {
+    Motor::i().update();
     crc = _crc16_update(crc, start[ii]);
   }
   return crc == crcRef;

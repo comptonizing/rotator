@@ -29,6 +29,8 @@
 #include <Arduino.h>
 #include <util/crc16.h>
 
+#include "Motor.h"
+
 class CommandBuffer {
   public:
     static CommandBuffer &i();
