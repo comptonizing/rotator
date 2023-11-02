@@ -20,7 +20,7 @@
 #
 
 
-AC_INIT([rotator-driver], [0.2], [philipp.ph.weber@fau.de])
+AC_INIT([rotator-driver], [0.3], [philipp.ph.weber@fau.de])
 
 AC_PREFIX_DEFAULT([/usr])
 
