@@ -47,6 +47,10 @@ License:   GPL-3.0+
  On Debian systems, the complete text of the GNU General Public License
  Version 3 can be found in `/usr/share/common-licenses/GPL-3'.
 
+Files:     src/json.hpp
+Copyright: __NO_COPYRIGHT_NOR_LICENSE__
+License:   __NO_COPYRIGHT_NOR_LICENSE__
+
 Files:     config.guess
            config.sub
 Copyright: 1992-2022 Free Software Foundation, Inc.
