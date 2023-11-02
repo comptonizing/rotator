@@ -20,7 +20,7 @@
 #
 
 
-AC_INIT([powerbox-driver], [0.1], [philipp.ph.weber@fau.de])
+AC_INIT([rotator-driver], [0.1], [philipp.ph.weber@fau.de])
 
 AC_PREFIX_DEFAULT([/usr])
 
