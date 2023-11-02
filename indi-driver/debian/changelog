@@ -1,4 +1,4 @@
-indi-pollux-rotator (0.2-1) jammy; urgency=low
+indi-pollux-rotator (0.3-1) jammy; urgency=low
 
   * Fix file includes
 
