@@ -27,7 +27,7 @@
 static std::unique_ptr<RotatorPollux> rotatorPolluxDriver((new RotatorPollux()));
 
 RotatorPollux::RotatorPollux() {
-    setVersion(0, 2);
+    setVersion(0, 3);
 }
 
 const char *RotatorPollux::getDefaultName() {
