@@ -391,7 +391,7 @@ bool Settings::runSetStealthChop(const char *cmd) {
 
 bool Settings::runSetCoolStep(const char *cmd) {
     bool enabled;
-    bool found;
+    bool found = false;
     if ( strcmp_P(cmd, F("set coolstep on")) == 0 ) {
         enabled = true;
         found = true;
