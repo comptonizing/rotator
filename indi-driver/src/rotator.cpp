@@ -253,7 +253,13 @@ void RotatorPollux::cmdCrc(const char *cmd, char *out) {
   out[0] = '#';
   out[len+1] = '\0';
   out[len+2] = ((char *) &crc)[0];
+  if ( out[len+2] == '$' ) {
+    out[len+2] = '1';
+  }
   out[len+3] = ((char *) &crc)[1];
+  if ( out[len+3] == '$' ) {
+    out[len+3] = '1';
+  }
   out[len+4] = '$';
   out[len+5] = '\0';
 }
@@ -264,14 +270,21 @@ bool RotatorPollux::checkCrc(const char *rsp) {
   ((char *) &crcGotten)[0] = rsp[len+1];
   ((char *) &crcGotten)[1] = rsp[len+2];
   uint16_t crcCalculated = crcCalc((const void *) rsp, len);
+  char *crcChar = (char *) &crcCalculated;
+  if ( crcChar[0] == '$' ) {
+    crcChar[0] = '1';
+  }
+  if ( crcChar[1] == '$' ) {
+    crcChar[1] = '1';
+  }
   if ( crcGotten == crcCalculated ) {
     return true;
   } else {
     LOG_ERROR("Checksum error");
     LOGF_ERROR("Message: %s", rsp);
     LOGF_ERROR("Checksum: %d (0x%02x 0x%02x), expected %d (0x%02x 0x%02x)",
-        crcCalculated, ((unsigned char *) &crcCalculated)[0], ((unsigned char *) &crcCalculated)[1],
-        crcGotten, ((unsigned char *) &crcGotten)[0], ((unsigned char *) &crcGotten)[1]);
+    crcCalculated, ((unsigned char *) &crcCalculated)[0], ((unsigned char *) &crcCalculated)[1],
+    crcGotten, ((unsigned char *) &crcGotten)[0], ((unsigned char *) &crcGotten)[1]);
     return false;
   }
 }
