@@ -133,6 +133,13 @@ void Settings::sendMessage(char *msg) {
   crcMsg[0] = ((char *) &crc)[0];
   crcMsg[1] = ((char *) &crc)[1];
   crcMsg[2] = '\0';
+  // Must handle '$' which is end of message character
+  if ( crcMsg[0] == '$' ) {
+    crcMsg[0] = '1';
+  }
+  if ( crcMsg[1] == '$' ) {
+    crcMsg[1] = '1';
+  }
   Serial.print(MSG_PREFIX);
   Motor::i().update();
   Serial.print(msg);
@@ -154,6 +161,13 @@ void Settings::sendMessage(const __FlashStringHelper *msg) {
   crcMsg[0] = ((char *) &crc)[0];
   crcMsg[1] = ((char *) &crc)[1];
   crcMsg[2] = '\0';
+  // Must handle '$' which is end of message character
+  if ( crcMsg[0] == '$' ) {
+    crcMsg[0] = '1';
+  }
+  if ( crcMsg[1] == '$' ) {
+    crcMsg[1] = '1';
+  }
   Serial.print(MSG_PREFIX);
   Motor::i().update();
   Serial.print(msg);
