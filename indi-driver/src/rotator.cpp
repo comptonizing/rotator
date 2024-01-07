@@ -65,10 +65,10 @@ bool RotatorPollux::initProperties() {
         });
     registerConnection(serialConnection);
 
-    IUFillNumber(&MotorN[SPEED], "SPEED", "Speed", "%.0f", 1, 4000, 1000, 1);
-    IUFillNumber(&MotorN[ACCEL], "ACCEL", "Acceleration", "%.0f", 1, 4000, 1000, 1);
+    IUFillNumber(&MotorN[SPEED], "SPEED", "Speed", "%.0f", 1, 200, 1, 20);
+    IUFillNumber(&MotorN[ACCEL], "ACCEL", "Acceleration", "%.0f", 1, 200, 1, 20);
     IUFillNumber(&MotorN[RUNCURRENT], "RUNCURRENT", "Run Current [%]", "%.0f", 1, 100, 1, 100);
-    IUFillNumber(&MotorN[HOLDCURRENT], "HOLDCURRENT", "Hold Current [%]", "%.0f", 1, 100, 1, 100);
+    IUFillNumber(&MotorN[HOLDCURRENT], "HOLDCURRENT", "Hold Current [%]", "%.0f", 0, 100, 1, 10);
     IUFillNumber(&MotorN[STEPS_PER_MOTOR_REVOLUTION], "STEPS_PER_MOTOR_REVOLUTION",
             "Steps per revolution", "%.0f", 1, 10000, 1, 200);
     IUFillNumberVector(&MotorNP, MotorN, 5, getDeviceName(), "MOTOR", "Motor Settings",
@@ -108,7 +108,7 @@ bool RotatorPollux::initProperties() {
             ISR_1OFMANY, TIMEOUT, IPS_IDLE);
 
     IUFillNumber(&GearN[TEETH_SMALL], "TEETH_SMALL", "Teeth small", "%.0f", 1, 100, 1, 10);
-    IUFillNumber(&GearN[TEETH_BIG], "TEETH_BIG", "Teeth big", "%.0f", 1, 1000, 1, 140);
+    IUFillNumber(&GearN[TEETH_BIG], "TEETH_BIG", "Teeth big", "%.0f", 1, 1000, 1, 170);
     IUFillNumberVector(&GearNP, GearN, 2, getDeviceName(), "GEAR", "Gear Settings",
             MAIN_CONTROL_TAB, IP_RW, TIMEOUT, IPS_IDLE);
 
