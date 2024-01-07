@@ -29,10 +29,9 @@ Motor::Motor() {
     m_driver.setup(*m_serial);
     m_stepper = new AccelStepper(1, PIN_STEP, PIN_DIR);
 
-    //  m_driver.enableCoolStep();
+    m_driver.enable();
     m_driver.setRunCurrent(m_runCurrent);
     m_driver.setHoldCurrent(m_holdCurrent);
-    m_driver.setMicrostepsPerStep(m_microStepping);
     m_driver.setStandstillMode(m_standStillMode);
     m_driver.disableAnalogCurrentScaling();
     if ( m_coolStep ) {
@@ -45,7 +44,8 @@ Motor::Motor() {
     } else {
         m_driver.disableStealthChop();
     }
-    m_driver.enable();
+
+	setGear(m_teethSmall, m_teethBig, m_motorSteps, m_microStepping);
 
     m_stepper->setCurrentPosition(0);
     m_stepper->setSpeed(m_speed);

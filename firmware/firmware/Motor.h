@@ -88,19 +88,19 @@ class Motor {
         Motor(const Motor &);
         Motor& operator=(const Motor&);
 
-        uint8_t m_runCurrent = 50;
+        uint8_t m_runCurrent = 100;
         uint8_t m_holdCurrent = 10;
         bool m_stealthChop = false;
         bool m_coolStep = true;
         bool m_invert = false;
-        uint16_t m_speed = 500;
-        uint16_t m_accel = 200;
+        uint16_t m_speed = 20;
+        uint16_t m_accel = 10;
         TMC2209::StandstillMode m_standStillMode = TMC2209::StandstillMode::NORMAL;
 
-        uint8_t m_microStepping = 16;
+        uint8_t m_microStepping = 1;
         uint16_t m_motorSteps = 200;
         uint16_t m_teethSmall = 20;
-        uint16_t m_teethBig = 140;
+        uint16_t m_teethBig = 170;
 
         float m_targetAngle = 0.0;
 

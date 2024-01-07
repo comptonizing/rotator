@@ -103,14 +103,11 @@ void Settings::saveToEEPROM() {
 }
 
 void Settings::applySettings() {
-    Motor::i().setTeethSmall(m_teethSmall);
-    Motor::i().setTeethBig(m_teethBig);
+	Motor::i().setGear(m_teethSmall, m_teethBig, m_motorSteps, m_microStepping);
+    Motor::i().setSpeed(m_speed);
     Motor::i().setRunCurrent(m_runCurrent);
     Motor::i().setHoldCurrent(m_holdCurrent);
-    Motor::i().setMotorSteps(m_motorSteps);
-    Motor::i().setMicrostepping(m_microStepping);
     Motor::i().setInverted(m_invert);
-    Motor::i().setSpeed(m_speed);
     Motor::i().setStandStillMode(m_standStillMode);
     Motor::i().setStealthChop(m_stealthChop);
     Motor::i().setCoolStep(m_coolStep);
