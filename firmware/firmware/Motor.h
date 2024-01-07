@@ -81,6 +81,9 @@ class Motor {
         bool coolStep();
         void setCoolStep(bool enabled);
         void stop();
+		void enable();
+		void disable();
+		bool isEnabled();
 
     private:
         Motor();
@@ -96,6 +99,7 @@ class Motor {
         uint16_t m_speed = 20;
         uint16_t m_accel = 10;
         TMC2209::StandstillMode m_standStillMode = TMC2209::StandstillMode::NORMAL;
+		bool m_enabled = false;
 
         uint8_t m_microStepping = 1;
         uint16_t m_motorSteps = 200;

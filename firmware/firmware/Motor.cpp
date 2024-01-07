@@ -29,7 +29,7 @@ Motor::Motor() {
     m_driver.setup(*m_serial);
     m_stepper = new AccelStepper(1, PIN_STEP, PIN_DIR);
 
-    m_driver.enable();
+	enable();
     m_driver.setRunCurrent(m_runCurrent);
     m_driver.setHoldCurrent(m_holdCurrent);
     m_driver.setStandstillMode(m_standStillMode);
@@ -54,6 +54,13 @@ Motor::Motor() {
 
 void Motor::update() {
     m_stepper->run();
+	if ( ! m_stepper->isRunning() ) {
+		if ( m_holdCurrent == 0 ) {
+			disable();
+		} else {
+			enable();
+		}
+	}
 }
 
 float Motor::gearRatio() {
@@ -93,6 +100,7 @@ float Motor::currentAngle() {
 }
 
 void Motor::setTargetSteps(step_t steps) {
+	enable();
     m_stepper->moveTo(steps);
 }
 
@@ -314,4 +322,24 @@ void Motor::setCoolStep(bool enabled) {
     } else {
         m_driver.disableCoolStep();
     }
+}
+
+void Motor::enable() {
+	if ( m_enabled ) {
+		return;
+	}
+	m_driver.enable();
+	m_enabled = true;
+}
+
+void Motor::disable() {
+	if ( ! m_enabled ) {
+		return;
+	}
+	m_driver.disable();
+	m_enabled = false;
+}
+
+bool Motor::isEnabled() {
+	return m_enabled;
 }
