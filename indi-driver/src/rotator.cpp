@@ -22,7 +22,6 @@
 
 
 #include "rotator.h"
-#include <indirotator.h>
 
 static std::unique_ptr<RotatorPollux> rotatorPolluxDriver((new RotatorPollux()));
 
@@ -63,7 +62,6 @@ bool RotatorPollux::initProperties() {
     serialConnection->registerHandshake([&]() {
         return Handshake();
         });
-    registerConnection(serialConnection);
 
     IUFillNumber(&MotorN[SPEED], "SPEED", "Speed", "%.0f", 1, 200, 1, 20);
     IUFillNumber(&MotorN[ACCEL], "ACCEL", "Acceleration", "%.0f", 1, 200, 1, 20);
